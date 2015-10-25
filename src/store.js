@@ -1,30 +1,22 @@
+// This module bootstraps and exports the flux store
 import {createStore, applyMiddleware} from 'redux';
-import Immutable from 'immutable';
 import thunk from 'redux-thunk';
-import {combineReducers} from 'redux-immutable';
+import createLogger from 'redux-logger';
+// Import the root reducer (which imports all subreducers)
+import rootReducer from './reducers/index';
 
-// Import all reducers
-import * as cryptocurrencies from './reducers/cryptocurrencies';
+let store;
 
-console.info(cryptocurrencies)
-// Combine reducers into one
-let rootReducer = combineReducers({
-	cryptocurrencies
-});
-
-// Initial state for us will just be an empty object
-// In a complex application, we might rehydrate this state from AsyncStorage or etc
-let state = Immutable.Map({});
-state = rootReducer(state, {
-	name: 'CONSTRUCT'
-})
-
-// Apply the middleware - we're using redux-thunk for async actions
+// Initializing with middleware
 const createStoreWithMiddleware = applyMiddleware(
-	thunk
-)(createStore)
+	// we're using redux-thunk for async actions
+	thunk,
+	// Create a logger to make it easy to debug state changes
+	createLogger()
+)(createStore);
 
-// Create the store with an initial state
-const store = createStoreWithMiddleware(rootReducer, state);
+// Create the store with an initial (empty) state
+// In a complex application, we might rehydrate this state from AsyncStorage or etc
+store = createStoreWithMiddleware(rootReducer, {});
 
 export default store;
